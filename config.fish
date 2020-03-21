@@ -2,6 +2,26 @@ function ...;   cd ../..; end
 function ....;  cd ../../..; end
 function .....; cd ../../../..; end
 
+function d
+    set -l dirs
+
+    # This is obviously much less efficient than e.g. `sort -u`, but it
+    # preserves the relative order of entries and `dirprev` is small enough
+    # (25 elements) that it doesn't matter anyway
+    for elt in $dirprev
+        if not contains $elt $dirs; and test "$elt" != "$PWD"
+            set -a dirs $elt
+        end
+    end
+
+    if test (count $dirs) -gt 0
+        cd (printf '%s\0' $dirs | fzf --read0)
+    else
+        echo "No recent directories"
+        return 1
+    end
+end
+
 function prepend_to_path
     if test -d $argv[1]
         if not contains $argv[1] $PATH
